@@ -3,813 +3,330 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ENSABM Exam Paper Prep</title>
+    <title>ENSABM Exam Paper Editor</title>
     <style>
-      :root {
-        --bg: #f4f7fb;
-        --panel: #ffffff;
-        --panel-soft: #f8fbff;
-        --ink: #12263a;
-        --muted: #61768c;
-        --accent: #0f6cbd;
-        --accent-2: #0c4a74;
-        --success: #2ecc71;
-        --border: #d8e3ef;
-        --shadow: 0 16px 40px rgba(13, 41, 71, 0.12);
-      }
-
       * { box-sizing: border-box; }
       body {
         margin: 0;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        color: var(--ink);
-        background: linear-gradient(135deg, #eef4ff 0%, var(--bg) 100%);
+        font-family: Arial, Helvetica, sans-serif;
+        color: #000;
+        background: #eee;
       }
-
-      .app-shell {
-        max-width: 1440px;
+      .app {
+        max-width: 1400px;
         margin: 0 auto;
-        padding: 24px;
+        padding: 12px;
       }
-
-      .topbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 16px;
-        margin-bottom: 20px;
-        flex-wrap: wrap;
-      }
-
-      .brand-block h1 {
-        margin: 0 0 6px;
-        font-size: clamp(1.4rem, 2vw, 2rem);
-      }
-
-      .brand-block p {
-        margin: 0;
-        color: var(--muted);
-      }
-
-      .status-pill {
-        background: rgba(15, 108, 189, 0.1);
-        color: var(--accent);
-        padding: 10px 14px;
-        border-radius: 999px;
-        font-weight: 700;
-        border: 1px solid rgba(15, 108, 189, 0.18);
-      }
-
-      .layout-grid {
+      h1, h2, h3, p { margin: 0 0 10px; }
+      .top-layout {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
+        grid-template-columns: minmax(360px, 1fr) minmax(360px, 1fr);
+        gap: 12px;
         align-items: start;
       }
-
-      .full-span {
-        grid-column: 1 / -1;
-      }
-
       .panel {
-        background: var(--panel);
-        border: 1px solid var(--border);
-        border-radius: 22px;
-        box-shadow: var(--shadow);
-        padding: 20px;
+        background: #fff;
+        padding: 12px;
       }
-
-      .panel h2, .panel h3 {
-        margin-top: 0;
-        margin-bottom: 16px;
-      }
-
-      .controls-row {
-        display: grid;
-        gap: 14px;
-        margin-bottom: 16px;
-      }
-
-      .control-card {
-        background: var(--panel-soft);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 12px 14px;
-      }
-
-      .control-card label {
-        display: block;
-        font-weight: 700;
-        margin-bottom: 6px;
-        color: var(--accent-2);
-      }
-
-      .control-card input[type="range"] {
-        width: 100%;
-        accent-color: var(--accent);
-      }
-
-      .control-card .value {
-        color: var(--muted);
-        font-size: 0.95rem;
-      }
-
-      .presets {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-      }
-
-      button, select {
-        border: none;
-        border-radius: 999px;
-        padding: 10px 14px;
-        font-weight: 700;
-        cursor: pointer;
-      }
-
-      button {
-        background: var(--accent);
-        color: #fff;
-      }
-
-      button.secondary {
-        background: #e5f0fb;
-        color: var(--accent-2);
-      }
-
-      button.danger {
-        background: #ffefef;
-        color: #c0392b;
-      }
-
-      .draft-paper {
-        position: relative;
-        width: 100%;
-        min-height: 500px;
-        border: 1px solid #d2dce7;
-        border-radius: 18px;
-        background: linear-gradient(180deg, #fefefe 0%, #f7f9fc 100%);
-        overflow: hidden;
-        box-shadow: inset 0 0 0 1px rgba(15, 108, 189, 0.06);
-      }
-
-      .draft-paper::before {
-        content: "";
-        position: absolute;
-        inset: 16px;
-        border: 1px dashed rgba(15, 108, 189, 0.18);
-        border-radius: 14px;
-        pointer-events: none;
-      }
-
-      .brand-layer {
-        position: absolute;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        transform: translate(-50%, -50%) scale(var(--scale, 1));
-        left: calc(var(--offset-x, 50%) + var(--shift-x, 0px));
-        top: calc(var(--offset-y, 50%) + var(--shift-y, 0px));
-        min-width: 80px;
-        min-height: 60px;
-        padding: 0;
-        background: transparent;
-        border: none;
-        box-shadow: none;
-        z-index: 2;
-        pointer-events: none;
-      }
-
-      .brand-layer img {
-        display: block;
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-        width: 140px;
-        height: auto;
-      }
-
-      .draft-meta {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 10px;
+      .preview-panel { grid-column: 1; }
+      .controls-panel { grid-column: 2; }
+      .table-panel {
         margin-top: 12px;
-        flex-wrap: wrap;
-      }
-
-      .table-wrap {
-        overflow-x: auto;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 8px;
-      }
-
-      th, td {
-        padding: 10px 8px;
-        text-align: left;
-        border-bottom: 1px solid var(--border);
-      }
-
-      th {
-        font-size: 0.9rem;
-        color: var(--muted);
-      }
-
-      input[type="text"], input[type="number"] {
-        width: 100%;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 9px 10px;
-        font-size: 0.95rem;
         background: #fff;
+        padding: 12px;
       }
-
-      .table-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-bottom: 12px;
-      }
-
-      .print-controls {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-bottom: 12px;
-      }
-
-      .preview-stack {
-        display: grid;
-        gap: 14px;
-      }
-
-      .page-card {
-        border: 1px solid var(--border);
-        border-radius: 18px;
-        padding: 16px;
-        background: #fcfdff;
-      }
-
-      .page-card .page-title {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-        color: var(--accent-2);
-        font-weight: 700;
-      }
-
-      .paper-preview {
-        border: 1px solid #d3dce8;
-        border-radius: 16px;
-        padding: 18px;
-        background: #fff;
-        min-height: 250px;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .paper-preview .preview-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 14px;
-        margin-bottom: 14px;
-        font-size: 0.95rem;
-      }
-
-      .paper-preview .preview-header strong {
-        color: var(--accent-2);
-      }
-
-      .preview-students {
-        position: absolute;
-        left: calc(50% + var(--seat-list-x, 0px));
-        top: calc(50% + var(--seat-list-y, 0px));
-        transform: translate(-50%, -50%);
-        width: calc(100% - 40px);
+      .control-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-        z-index: 3;
+        gap: 8px 12px;
+        margin-bottom: 16px;
       }
-
-      .student-chip {
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 8px 10px;
-        background: #fcfeff;
-        font-size: 0.9rem;
+      label { display: block; font-weight: 700; margin-bottom: 4px; }
+      input[type="number"] { width: 100%; padding: 6px; }
+      button { padding: 7px 10px; margin: 0 4px 8px 0; cursor: pointer; }
+      .a4-page {
+        position: relative;
+        width: 210mm;
+        height: 297mm;
+        background: #fff;
+        overflow: hidden;
+        margin: 0 auto 12px;
       }
-
-      .student-chip .seat {
-        font-weight: 800;
-        color: var(--accent);
-        font-size: 1rem;
+      .screen-page {
+        transform: scale(0.45);
+        transform-origin: top left;
+        margin-right: calc(210mm * -0.55);
+        margin-bottom: calc(297mm * -0.55 + 12px);
       }
-
-      .empty-state {
-        color: var(--muted);
-        font-style: italic;
+      .page-wrap {
+        width: calc(210mm * 0.45);
+        min-height: calc(297mm * 0.45);
+        margin: 0 auto 16px;
       }
-
-      .no-print {
+      .print-image, .seat-number {
+        position: absolute;
         display: block;
       }
-
-      @media (max-width: 1000px) {
-        .layout-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .full-span {
-          grid-column: auto;
-        }
+      .print-image { object-fit: contain; }
+      .seat-number {
+        font-weight: 700;
+        line-height: 1;
+        white-space: nowrap;
       }
-
-      @media (max-width: 700px) {
-        .app-shell { padding: 14px; }
-        .preview-students { grid-template-columns: 1fr; }
+      .page-label { margin: 0 0 6px; font-weight: 700; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 6px; text-align: left; border-bottom: 1px solid #ccc; }
+      td input { max-width: 160px; }
+      .hint { font-size: 13px; }
+      @media (max-width: 900px) {
+        .top-layout { grid-template-columns: 1fr; }
+        .preview-panel, .controls-panel { grid-column: auto; }
       }
-
-      @page {
-        size: A4;
-        margin: 10mm;
-      }
-
+      @page { size: A4; margin: 0; }
       @media print {
-        body {
-          background: #fff;
-          color: #000;
-          font-size: 12pt;
-        }
-
-        .no-print {
-          display: none !important;
-        }
-
-        .app-shell {
-          max-width: none;
-          padding: 0;
+        body { background: #fff; margin: 0; }
+        .no-print { display: none !important; }
+        .app { max-width: none; padding: 0; margin: 0; }
+        .top-layout, .preview-panel, .print-pages { display: block; }
+        .preview-panel { padding: 0; background: #fff; }
+        .page-wrap { width: auto; min-height: 0; margin: 0; }
+        .page-label { display: none; }
+        .a4-page {
+          width: 210mm;
+          height: 297mm;
           margin: 0;
-        }
-
-        .panel,
-        .topbar {
-          box-shadow: none;
-          border: 0;
-          padding: 0;
-          margin: 0;
-        }
-
-        .page-card {
-          border: 0;
-          padding: 0;
-          background: #fff;
+          break-after: page;
           page-break-after: always;
         }
-
-        .page-card:last-child {
-          page-break-after: auto;
-        }
-
-        .paper-preview {
-          border: 1px solid #000;
-          box-shadow: none;
-          min-height: 0;
-          margin: 0;
-        }
-
-        .preview-stack {
-          gap: 0;
-        }
+        .a4-page:last-child { break-after: auto; page-break-after: auto; }
+        .screen-page { transform: none; margin: 0; }
       }
     </style>
   </head>
   <body>
-    <div class="app-shell">
-      <header class="topbar no-print">
-        <div class="brand-block">
-          <h1>ENSABM Exam Paper Preparation</h1>
-          <p>Draft, digitize seating lists, and print polished exam pages for the department.</p>
-        </div>
-        <div class="status-pill">Live print preview • A4 ready</div>
+    <main class="app">
+      <header class="no-print">
+        <h1>ENSABM Exam Paper Editor</h1>
+        <p class="hint">Position the logo, cachet, and Desk / Seat number, then print the generated A4 pages.</p>
       </header>
 
-      <section class="layout-grid">
-        <div class="panel">
-          <h2>Print Engine & Preview</h2>
-          <div class="print-controls no-print">
-            <button id="printBtn">Open browser print</button>
-            <button class="secondary" id="modeAll">All pages</button>
-            <button class="secondary" id="modeOdd">Odd pages</button>
-            <button class="secondary" id="modeEven">Even pages</button>
+      <section class="top-layout">
+        <section class="panel preview-panel">
+          <h2 class="no-print">Print Engine &amp; Preview</h2>
+          <div class="no-print">
+            <button id="printAllBtn" type="button">Print All</button>
+            <button id="printOddBtn" type="button">Print Odd Pages</button>
+            <button id="printEvenBtn" type="button">Print Even Pages</button>
+            <p id="printModeText" class="hint">Current print mode: All pages</p>
           </div>
-          <div class="preview-stack" id="previewStack"></div>
-        </div>
+          <div id="printPages" class="print-pages"></div>
+        </section>
 
-        <div class="panel">
-          <h2>Branding & Draft Layout</h2>
-          <div class="controls-row">
-            <div class="control-card">
-              <label for="logoX">Logo X position</label>
-              <input id="logoX" type="range" min="-220" max="220" value="0" />
-              <div class="value" id="logoXValue">0 px</div>
-            </div>
-            <div class="control-card">
-              <label for="logoY">Logo Y position</label>
-              <input id="logoY" type="range" min="-220" max="220" value="0" />
-              <div class="value" id="logoYValue">0 px</div>
-            </div>
-            <div class="control-card">
-              <label for="logoScale">Logo scale</label>
-              <input id="logoScale" type="range" min="0.7" max="1.8" step="0.05" value="1" />
-              <div class="value" id="logoScaleValue">1.00 ×</div>
-            </div>
+        <section class="panel controls-panel no-print">
+          <h2>Branding &amp; Draft Layout</h2>
+
+          <h3>ENSABM Logo</h3>
+          <div class="control-grid">
+            <div><label for="logoX">X position (mm)</label><input id="logoX" type="number" step="1" value="15" /></div>
+            <div><label for="logoY">Y position (mm)</label><input id="logoY" type="number" step="1" value="12" /></div>
+            <div><label for="logoW">Width (mm)</label><input id="logoW" type="number" step="1" min="1" value="32" /></div>
+            <div><label for="logoH">Height (mm)</label><input id="logoH" type="number" step="1" min="1" value="32" /></div>
           </div>
 
-          <div class="controls-row">
-            <div class="control-card">
-              <label for="stampX">Stamp X position</label>
-              <input id="stampX" type="range" min="-220" max="220" value="0" />
-              <div class="value" id="stampXValue">0 px</div>
-            </div>
-            <div class="control-card">
-              <label for="stampY">Stamp Y position</label>
-              <input id="stampY" type="range" min="-220" max="220" value="0" />
-              <div class="value" id="stampYValue">0 px</div>
-            </div>
-            <div class="control-card">
-              <label for="stampScale">Stamp scale</label>
-              <input id="stampScale" type="range" min="0.6" max="1.8" step="0.05" value="1" />
-              <div class="value" id="stampScaleValue">1.00 ×</div>
-            </div>
-            <div class="control-card">
-              <label for="seatX">Seat number X position</label>
-              <input id="seatX" type="range" min="-220" max="220" value="0" />
-              <div class="value" id="seatXValue">0 px</div>
-            </div>
-            <div class="control-card">
-              <label for="seatY">Seat number Y position</label>
-              <input id="seatY" type="range" min="-220" max="220" value="0" />
-              <div class="value" id="seatYValue">0 px</div>
-            </div>
+          <h3>Cachet</h3>
+          <div class="control-grid">
+            <div><label for="cachetX">X position (mm)</label><input id="cachetX" type="number" step="1" value="150" /></div>
+            <div><label for="cachetY">Y position (mm)</label><input id="cachetY" type="number" step="1" value="235" /></div>
+            <div><label for="cachetW">Width (mm)</label><input id="cachetW" type="number" step="1" min="1" value="38" /></div>
+            <div><label for="cachetH">Height (mm)</label><input id="cachetH" type="number" step="1" min="1" value="38" /></div>
           </div>
 
-          <div class="presets no-print">
-            <button class="secondary" id="resetLayout">Reset layout</button>
-            <button class="secondary" id="centerLayout">Center both</button>
+          <h3>Desk / Seat Number</h3>
+          <div class="control-grid">
+            <div><label for="seatX">X position (mm)</label><input id="seatX" type="number" step="1" value="92" /></div>
+            <div><label for="seatY">Y position (mm)</label><input id="seatY" type="number" step="1" value="132" /></div>
+            <div><label for="seatSize">Font size (pt)</label><input id="seatSize" type="number" step="1" min="1" value="28" /></div>
           </div>
-
-          <div class="draft-paper" id="draftPaper">
-            <div class="brand-layer logo-layer" id="logoLayer" data-role="logo">
-              <img src="images/logo.png" alt="ENSABM logo" />
-            </div>
-            <div class="brand-layer stamp-layer" id="stampLayer" data-role="stamp">
-              <img src="images/logo.png" alt="ENSABM official stamp" />
-            </div>
-          </div>
-          <div class="draft-meta">
-            <span>Clean branding with size and positioning controls only.</span>
-            <span id="layoutSummary">Position & size active</span>
-          </div>
-        </div>
-
-        <div class="panel full-span">
-          <h2>Student Digitization Table</h2>
-          <div class="table-actions no-print">
-            <button id="addRow">Add row</button>
-            <button class="secondary" id="generateRows">Generate 20 seats</button>
-            <button class="secondary" id="clearRows">Clear table</button>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Desk / Seat</th>
-                  <th class="no-print">Action</th>
-                </tr>
-              </thead>
-              <tbody id="studentTableBody"></tbody>
-            </table>
-          </div>
-        </div>
+          <button id="resetBtn" type="button">Reset layout</button>
+        </section>
       </section>
-    </div>
+
+      <section class="table-panel no-print">
+        <h2>Student Digitization Table</h2>
+        <div>
+          <button id="addRowBtn" type="button">Add row</button>
+          <button id="generateBtn" type="button">Generate sequential numbers automatically</button>
+          <button id="clearBtn" type="button">Clear rows</button>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Desk / Seat</th><th>Action</th></tr>
+          </thead>
+          <tbody id="seatRows"></tbody>
+        </table>
+      </section>
+    </main>
 
     <script>
       (() => {
-        // --- State --------------------------------------------------------------
+        // Application state kept small: only printable elements and Desk / Seat rows.
         const state = {
-          students: [],
-          logo: { x: 0, y: 0, scale: 1 },
-          stamp: { x: 0, y: 0, scale: 1 },
-          seatPosition: { x: 0, y: 0 },
-          printMode: "all"
+          printMode: "all",
+          layout: {
+            logo: { x: 15, y: 12, w: 32, h: 32 },
+            cachet: { x: 150, y: 235, w: 38, h: 38 },
+            seat: { x: 92, y: 132, size: 28 }
+          },
+          seats: ["01", "02", "03"]
         };
 
-        // --- DOM references ----------------------------------------------------
-        const tableBody = document.getElementById("studentTableBody");
-        const previewStack = document.getElementById("previewStack");
-        const logoLayer = document.getElementById("logoLayer");
-        const stampLayer = document.getElementById("stampLayer");
-        const layoutSummary = document.getElementById("layoutSummary");
+        const imagePaths = {
+          logo: "images/logo.png",
+          cachet: "images/cachet.png"
+        };
 
         const controls = {
           logoX: document.getElementById("logoX"),
           logoY: document.getElementById("logoY"),
-          logoScale: document.getElementById("logoScale"),
-          stampX: document.getElementById("stampX"),
-          stampY: document.getElementById("stampY"),
-          stampScale: document.getElementById("stampScale"),
+          logoW: document.getElementById("logoW"),
+          logoH: document.getElementById("logoH"),
+          cachetX: document.getElementById("cachetX"),
+          cachetY: document.getElementById("cachetY"),
+          cachetW: document.getElementById("cachetW"),
+          cachetH: document.getElementById("cachetH"),
           seatX: document.getElementById("seatX"),
-          seatY: document.getElementById("seatY")
+          seatY: document.getElementById("seatY"),
+          seatSize: document.getElementById("seatSize")
         };
 
-        const valueLabels = {
-          logoX: document.getElementById("logoXValue"),
-          logoY: document.getElementById("logoYValue"),
-          logoScale: document.getElementById("logoScaleValue"),
-          stampX: document.getElementById("stampXValue"),
-          stampY: document.getElementById("stampYValue"),
-          stampScale: document.getElementById("stampScaleValue"),
-          seatX: document.getElementById("seatXValue"),
-          seatY: document.getElementById("seatYValue")
-        };
+        const printPages = document.getElementById("printPages");
+        const seatRows = document.getElementById("seatRows");
+        const printModeText = document.getElementById("printModeText");
 
-        // --- Helpers ------------------------------------------------------------
-        function createStudentRow(student = {}, index = 0) {
+        // Converts a seat value to the required printable #01# format.
+        function formatSeat(value) {
+          const clean = String(value || "").replace(/\D/g, "");
+          return `#${(clean || "0").padStart(2, "0")}#`;
+        }
+
+        // Keeps editable values safe when injecting table HTML.
+        function escapeHtml(value) {
+          return String(value).replace(/[&<>'"]/g, (char) => ({
+            "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+          }[char]));
+        }
+
+        // Returns the page numbers that should be visible and printed.
+        function printableSeats() {
+          return state.seats.filter((seat, index) => {
+            const pageNumber = index + 1;
+            if (state.printMode === "odd") return pageNumber % 2 === 1;
+            if (state.printMode === "even") return pageNumber % 2 === 0;
+            return true;
+          });
+        }
+
+        // Builds a single A4 page so preview and print output share the exact markup.
+        function pageTemplate(seat, pageNumber) {
+          const { logo, cachet } = state.layout;
+          const seatLayout = state.layout.seat;
           return `
-            <tr>
-              <td><input type="number" data-index="${index}" data-field="seatNumber" value="${escapeHtml(student.seatNumber || "")}" placeholder="e.g. 01" /></td>
-              <td class="no-print"><button class="danger" data-action="remove" data-index="${index}">Delete</button></td>
-            </tr>
+            <div class="page-wrap">
+              <p class="page-label no-print">Page ${pageNumber}: ${formatSeat(seat)}</p>
+              <section class="a4-page screen-page">
+                <img class="print-image" src="${imagePaths.logo}" alt="ENSABM logo" style="left:${logo.x}mm;top:${logo.y}mm;width:${logo.w}mm;height:${logo.h}mm;" />
+                <img class="print-image" src="${imagePaths.cachet}" alt="Official cachet" onerror="this.onerror=null;this.src='images/cache.png';" style="left:${cachet.x}mm;top:${cachet.y}mm;width:${cachet.w}mm;height:${cachet.h}mm;" />
+                <div class="seat-number" style="left:${seatLayout.x}mm;top:${seatLayout.y}mm;font-size:${seatLayout.size}pt;">${formatSeat(seat)}</div>
+              </section>
+            </div>
           `;
         }
 
-        function escapeHtml(value) {
-          return String(value)
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/\"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+        // Re-renders all live A4 preview pages after any control or table change.
+        function renderPreview() {
+          const seats = printableSeats();
+          printPages.innerHTML = seats.length
+            ? seats.map((seat, index) => pageTemplate(seat, index + 1)).join("")
+            : '<p class="hint no-print">No Desk / Seat rows available for this print mode.</p>';
+          printModeText.textContent = `Current print mode: ${state.printMode === "all" ? "All pages" : state.printMode === "odd" ? "Odd pages" : "Even pages"}`;
         }
 
-        function setLayerStyle(layer, config) {
-          layer.style.setProperty("--offset-x", "50%");
-          layer.style.setProperty("--offset-y", "50%");
-          layer.style.setProperty("--shift-x", `${config.x}px`);
-          layer.style.setProperty("--shift-y", `${config.y}px`);
-          layer.style.setProperty("--scale", config.scale.toFixed(2));
-        }
-
-        function refreshLayoutSummary() {
-          layoutSummary.textContent = `Position & size active`;
-        }
-
-        function renderStudents() {
-          if (!state.students.length) {
-            state.students = [{ seatNumber: "" }];
-          }
-
-          tableBody.innerHTML = state.students.map((student, index) => createStudentRow(student, index)).join("");
+        // Re-renders the editable one-column digitization table.
+        function renderTable() {
+          seatRows.innerHTML = state.seats.map((seat, index) => `
+            <tr>
+              <td><input type="number" min="1" step="1" value="${escapeHtml(seat)}" data-index="${index}" aria-label="Desk / Seat ${index + 1}" /></td>
+              <td><button type="button" data-delete="${index}">Delete row</button></td>
+            </tr>
+          `).join("");
           renderPreview();
         }
 
-        function addStudentRow() {
-          state.students.push({ seatNumber: "" });
-          renderStudents();
+        // Reads numeric control values into layout state.
+        function readLayoutControls() {
+          state.layout.logo = { x: +controls.logoX.value, y: +controls.logoY.value, w: +controls.logoW.value, h: +controls.logoH.value };
+          state.layout.cachet = { x: +controls.cachetX.value, y: +controls.cachetY.value, w: +controls.cachetW.value, h: +controls.cachetH.value };
+          state.layout.seat = { x: +controls.seatX.value, y: +controls.seatY.value, size: +controls.seatSize.value };
+          renderPreview();
         }
 
-        function removeStudentRow(index) {
-          state.students.splice(index, 1);
-          if (!state.students.length) {
-            state.students = [{ seatNumber: "" }];
-          }
-          renderStudents();
-        }
-
-        function generateSequentialSeats(count = 20) {
-          const generated = Array.from({ length: count }, (_, i) => ({
-            seatNumber: String(i + 1).padStart(2, "0")
-          }));
-          state.students = generated;
-          renderStudents();
-        }
-
-        function clearSeating() {
-          state.students = [{ seatNumber: "" }];
-          renderStudents();
-        }
-
-        function buildPages() {
-          const active = state.students.filter((row) => row.seatNumber);
-          const pages = [];
-          const studentsPerPage = 10;
-
-          if (!active.length) {
-            return [[]];
-          }
-
-          for (let i = 0; i < active.length; i += studentsPerPage) {
-            pages.push(active.slice(i, i + studentsPerPage));
-          }
-
-          return pages;
-        }
-
-        function renderPreview() {
-          const pages = buildPages();
-          const filteredPages = pages.filter((_, index) => {
-            if (state.printMode === "odd") return (index + 1) % 2 === 1;
-            if (state.printMode === "even") return (index + 1) % 2 === 0;
-            return true;
+        // Writes default layout values back to controls and preview.
+        function resetLayout() {
+          Object.assign(state.layout, {
+            logo: { x: 15, y: 12, w: 32, h: 32 },
+            cachet: { x: 150, y: 235, w: 38, h: 38 },
+            seat: { x: 92, y: 132, size: 28 }
           });
-
-          if (!filteredPages.length) {
-            previewStack.innerHTML = '<div class="empty-state">No printable content yet.</div>';
-            return;
-          }
-
-          previewStack.innerHTML = filteredPages
-            .map((students) => {
-              const visibleIndex = filteredPages.findIndex((page) => page === students) + 1;
-              return `
-                <article class="page-card">
-                  <div class="page-title">
-                    <span>Exam Draft Page ${visibleIndex}</span>
-                    <span>${students.length} student${students.length === 1 ? "" : "s"}</span>
-                  </div>
-                  <div class="paper-preview">
-                    <div class="preview-header">
-                      <div>
-                        <strong>ENSABM • Épreuve</strong><br />
-                        <span>Préparation de copies d’examen</span>
-                      </div>
-                      <div>${new Date().toLocaleDateString("fr-FR")}</div>
-                    </div>
-                    <div class="brand-layer logo-layer" style="position:absolute; left: 50%; top: 50%; --offset-x: 50%; --offset-y: 50%; --shift-x: ${state.logo.x}px; --shift-y: ${state.logo.y}px; --scale: ${state.logo.scale.toFixed(2)};">
-                      <img src="images/logo.png" alt="ENSABM logo" />
-                    </div>
-                    <div class="brand-layer stamp-layer" style="position:absolute; left: 50%; top: 50%; --offset-x: 50%; --offset-y: 50%; --shift-x: ${state.stamp.x}px; --shift-y: ${state.stamp.y}px; --scale: ${state.stamp.scale.toFixed(2)};">
-                      <img src="images/logo.png" alt="ENSABM stamp" />
-                    </div>
-                    <div class="preview-students" style="--seat-list-x: ${state.seatPosition.x}px; --seat-list-y: ${state.seatPosition.y}px; margin-top: 110px;">
-                      ${students.length ? students.map((student) => `
-                        <div class="student-chip">
-                          <div class="seat">#${escapeHtml(String(student.seatNumber || "00").padStart(2, "0"))}#</div>
-                          <div>Desk / Seat</div>
-                        </div>
-                      `).join("") : '<div class="empty-state">No students listed.</div>'}
-                    </div>
-                  </div>
-                </article>
-              `;
-            })
-            .join("");
+          controls.logoX.value = state.layout.logo.x; controls.logoY.value = state.layout.logo.y;
+          controls.logoW.value = state.layout.logo.w; controls.logoH.value = state.layout.logo.h;
+          controls.cachetX.value = state.layout.cachet.x; controls.cachetY.value = state.layout.cachet.y;
+          controls.cachetW.value = state.layout.cachet.w; controls.cachetH.value = state.layout.cachet.h;
+          controls.seatX.value = state.layout.seat.x; controls.seatY.value = state.layout.seat.y; controls.seatSize.value = state.layout.seat.size;
+          renderPreview();
         }
 
-        // --- Event binding ------------------------------------------------------
+        // Sets the print mode and uses native browser printing.
+        function printWithMode(mode) {
+          state.printMode = mode;
+          renderPreview();
+          window.print();
+        }
+
+        // Binds all user interactions once at startup.
         function bindEvents() {
-          Object.entries(controls).forEach(([key, element]) => {
-            element.addEventListener("input", (event) => {
-              const raw = event.target.value;
-              const numeric = parseFloat(raw);
-              const isSeatControl = key === "seatX" || key === "seatY";
-              const target = key.startsWith("logo") ? state.logo : key.startsWith("stamp") ? state.stamp : state.seatPosition;
-
-              if (isSeatControl) {
-                if (key.endsWith("X")) state.seatPosition.x = numeric;
-                if (key.endsWith("Y")) state.seatPosition.y = numeric;
-              } else {
-                if (key.endsWith("X")) target.x = numeric;
-                if (key.endsWith("Y")) target.y = numeric;
-                if (key.endsWith("Scale")) target.scale = numeric;
-              }
-
-              if (key === "logoX" || key === "logoY" || key === "logoScale") {
-                valueLabels.logoX.textContent = `${state.logo.x} px`;
-                valueLabels.logoY.textContent = `${state.logo.y} px`;
-                valueLabels.logoScale.textContent = `${state.logo.scale.toFixed(2)} ×`;
-                setLayerStyle(logoLayer, state.logo);
-              }
-
-              if (key === "stampX" || key === "stampY" || key === "stampScale") {
-                valueLabels.stampX.textContent = `${state.stamp.x} px`;
-                valueLabels.stampY.textContent = `${state.stamp.y} px`;
-                valueLabels.stampScale.textContent = `${state.stamp.scale.toFixed(2)} ×`;
-                setLayerStyle(stampLayer, state.stamp);
-              }
-
-              if (key === "seatX" || key === "seatY") {
-                valueLabels.seatX.textContent = `${state.seatPosition.x} px`;
-                valueLabels.seatY.textContent = `${state.seatPosition.y} px`;
-                renderPreview();
-              }
-
-              refreshLayoutSummary();
-            });
+          Object.values(controls).forEach((input) => input.addEventListener("input", readLayoutControls));
+          document.getElementById("resetBtn").addEventListener("click", resetLayout);
+          document.getElementById("printAllBtn").addEventListener("click", () => printWithMode("all"));
+          document.getElementById("printOddBtn").addEventListener("click", () => printWithMode("odd"));
+          document.getElementById("printEvenBtn").addEventListener("click", () => printWithMode("even"));
+          document.getElementById("addRowBtn").addEventListener("click", () => {
+            state.seats.push(String(state.seats.length + 1).padStart(2, "0"));
+            renderTable();
           });
-
-          document.getElementById("resetLayout").addEventListener("click", () => {
-            state.logo = { x: 0, y: 0, scale: 1 };
-            state.stamp = { x: 0, y: 0, scale: 1 };
-            state.seatPosition = { x: 0, y: 0 };
-            controls.logoX.value = 0;
-            controls.logoY.value = 0;
-            controls.logoScale.value = 1;
-            controls.stampX.value = 0;
-            controls.stampY.value = 0;
-            controls.stampScale.value = 1;
-            controls.seatX.value = 0;
-            controls.seatY.value = 0;
-            valueLabels.logoX.textContent = "0 px";
-            valueLabels.logoY.textContent = "0 px";
-            valueLabels.logoScale.textContent = "1.00 ×";
-            valueLabels.stampX.textContent = "0 px";
-            valueLabels.stampY.textContent = "0 px";
-            valueLabels.stampScale.textContent = "1.00 ×";
-            valueLabels.seatX.textContent = "0 px";
-            valueLabels.seatY.textContent = "0 px";
-            setLayerStyle(logoLayer, state.logo);
-            setLayerStyle(stampLayer, state.stamp);
-            renderPreview();
-            refreshLayoutSummary();
+          document.getElementById("generateBtn").addEventListener("click", () => {
+            const count = Math.max(state.seats.length, 20);
+            state.seats = Array.from({ length: count }, (_, index) => String(index + 1).padStart(2, "0"));
+            renderTable();
           });
-
-          document.getElementById("centerLayout").addEventListener("click", () => {
-            state.logo = { ...state.logo, x: 0, y: 0 };
-            state.stamp = { ...state.stamp, x: 0, y: 0 };
-            state.seatPosition = { x: 0, y: 0 };
-            controls.logoX.value = 0;
-            controls.logoY.value = 0;
-            controls.stampX.value = 0;
-            controls.stampY.value = 0;
-            controls.seatX.value = 0;
-            controls.seatY.value = 0;
-            valueLabels.logoX.textContent = "0 px";
-            valueLabels.logoY.textContent = "0 px";
-            valueLabels.stampX.textContent = "0 px";
-            valueLabels.stampY.textContent = "0 px";
-            valueLabels.seatX.textContent = "0 px";
-            valueLabels.seatY.textContent = "0 px";
-            setLayerStyle(logoLayer, state.logo);
-            setLayerStyle(stampLayer, state.stamp);
-            renderPreview();
-            refreshLayoutSummary();
+          document.getElementById("clearBtn").addEventListener("click", () => {
+            state.seats = [];
+            renderTable();
           });
-
-          document.getElementById("addRow").addEventListener("click", addStudentRow);
-          document.getElementById("generateRows").addEventListener("click", () => generateSequentialSeats(20));
-          document.getElementById("clearRows").addEventListener("click", clearSeating);
-
-          tableBody.addEventListener("input", (event) => {
-            const target = event.target;
-            if (!(target instanceof HTMLInputElement)) return;
-            const { index, field } = target.dataset;
-            if (index === undefined || field === undefined) return;
-            state.students[Number(index)][field] = target.value;
+          seatRows.addEventListener("input", (event) => {
+            if (!event.target.matches("input[data-index]")) return;
+            state.seats[Number(event.target.dataset.index)] = event.target.value;
             renderPreview();
           });
-
-          tableBody.addEventListener("click", (event) => {
-            const button = event.target.closest("button[data-action='remove']");
+          seatRows.addEventListener("click", (event) => {
+            const button = event.target.closest("button[data-delete]");
             if (!button) return;
-            removeStudentRow(Number(button.dataset.index));
-          });
-
-          document.getElementById("printBtn").addEventListener("click", () => window.print());
-          document.getElementById("modeAll").addEventListener("click", () => {
-            state.printMode = "all";
-            renderPreview();
-          });
-          document.getElementById("modeOdd").addEventListener("click", () => {
-            state.printMode = "odd";
-            renderPreview();
-          });
-          document.getElementById("modeEven").addEventListener("click", () => {
-            state.printMode = "even";
-            renderPreview();
+            state.seats.splice(Number(button.dataset.delete), 1);
+            renderTable();
           });
         }
 
-        // --- Init ----------------------------------------------------------------
-        function init() {
-          generateSequentialSeats(12);
-          setLayerStyle(logoLayer, state.logo);
-          setLayerStyle(stampLayer, state.stamp);
-          bindEvents();
-          refreshLayoutSummary();
-        }
-
-        init();
+        bindEvents();
+        renderTable();
       })();
     </script>
   </body>
