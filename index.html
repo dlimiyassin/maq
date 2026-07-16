@@ -182,7 +182,7 @@
 
         const imagePaths = {
           logo: "images/logo.png",
-          cachet: "images/cachet.png"
+          cachet: "images/cache.png"
         };
 
         const controls = {
@@ -234,8 +234,8 @@
             <div class="page-wrap">
               <p class="page-label no-print">Page ${pageNumber}: ${formatSeat(seat)}</p>
               <section class="a4-page screen-page">
-                <img class="print-image" src="${imagePaths.logo}" alt="ENSABM logo" style="left:${logo.x}mm;top:${logo.y}mm;width:${logo.w}mm;height:${logo.h}mm;" />
-                <img class="print-image" src="${imagePaths.cachet}" alt="Official cachet" onerror="this.onerror=null;this.src='images/cache.png';" style="left:${cachet.x}mm;top:${cachet.y}mm;width:${cachet.w}mm;height:${cachet.h}mm;" />
+                <img class="print-image" src="${imagePaths.logo}" alt="ENSABM logo" loading="eager" decoding="sync" style="left:${logo.x}mm;top:${logo.y}mm;width:${logo.w}mm;height:${logo.h}mm;" />
+                <img class="print-image" src="${imagePaths.cachet}" alt="Official cachet" loading="eager" decoding="sync" style="left:${cachet.x}mm;top:${cachet.y}mm;width:${cachet.w}mm;height:${cachet.h}mm;" />
                 <div class="seat-number" style="left:${seatLayout.x}mm;top:${seatLayout.y}mm;font-size:${seatLayout.size}pt;">${formatSeat(seat)}</div>
               </section>
             </div>
@@ -285,10 +285,25 @@
           renderPreview();
         }
 
+        // Waits for all printable images to finish loading before opening the print dialog.
+        // This prevents browsers from printing a broken image box when a freshly rendered
+        // cachet image is still being fetched or decoded.
+        function waitForPrintableImages() {
+          const images = Array.from(printPages.querySelectorAll("img.print-image"));
+          return Promise.all(images.map((image) => {
+            if (image.complete && image.naturalWidth > 0) return Promise.resolve();
+            return new Promise((resolve) => {
+              image.addEventListener("load", resolve, { once: true });
+              image.addEventListener("error", resolve, { once: true });
+            });
+          }));
+        }
+
         // Sets the print mode and uses native browser printing.
-        function printWithMode(mode) {
+        async function printWithMode(mode) {
           state.printMode = mode;
           renderPreview();
+          await waitForPrintableImages();
           window.print();
         }
 
