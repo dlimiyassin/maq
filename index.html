@@ -52,6 +52,22 @@
         overflow: hidden;
         margin: 0 auto 12px;
       }
+      .sticker-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: repeat(2, minmax(0, 1fr));
+        gap: 4mm;
+        width: 194mm;
+        height: 281mm;
+        margin: 8mm;
+      }
+      .sticker {
+        position: relative;
+        min-width: 0;
+        min-height: 0;
+        overflow: hidden;
+        border: 0.25mm solid #999;
+      }
       .screen-page {
         transform: scale(0.45);
         transform-origin: top left;
@@ -64,10 +80,9 @@
         margin: 0 auto 16px;
         border: 3px solid #ccc; /* Adds border around the preview container */
       }
-      .print-image, .seat-number {
+      .sticker .print-image, .sticker .seat-number {
         position: absolute;
         display: block;
-        
       }
       .print-image { object-fit: contain; }
       .seat-number {
@@ -84,12 +99,12 @@
         .top-layout { grid-template-columns: 1fr; }
         .preview-panel, .controls-panel { grid-column: auto; }
       }
-      @page { size: A4; margin: 0; }
+      @page { size: A4 portrait; margin: 0; }
       @media print {
         body { background: #fff; margin: 0; }
         .no-print { display: none !important; }
         .app { max-width: none; padding: 0; margin: 0; }
-        .top-layout, .preview-panel, .print-pages { display: block; border: 1px solid #000000; }
+        .top-layout, .preview-panel, .print-pages { display: block; }
         .preview-panel { padding: 0; background: #fff; }
         .page-wrap { width: auto; min-height: 0; margin: 0; }
         .page-label { display: none; }
@@ -99,10 +114,10 @@
           margin: 0;
           break-after: page;
           page-break-after: always;
-          border: 2px solid #000000;
         }
         .a4-page:last-child { break-after: auto; page-break-after: auto; }
-        .screen-page { transform: none; margin: 0; border: 2px solid #000000;}
+        .screen-page { transform: none; margin: 0; }
+        .sticker { border-color: #000; }
       }
     </style>
   </head>
@@ -110,7 +125,7 @@
     <main class="app">
       <header class="no-print">
         <h1>ENSABM Exam Paper Editor</h1>
-        <p class="hint">Position the logo, cachet, and Desk / Seat number, then print the generated A4 pages.</p>
+        <p class="hint">Position the logo, cachet, and Desk / Seat number inside one sticker, then print the generated A4 pages (four stickers per page).</p>
       </header>
 
       <section class="top-layout">
@@ -127,26 +142,27 @@
 
         <section class="panel controls-panel no-print">
           <h2>Draft Layout</h2>
+          <p class="hint">All measurements are relative to one sticker. The same layout is repeated in each A4 grid cell.</p>
 
           <h3>ENSABM Logo</h3>
           <div class="control-grid">
-            <div><label for="logoX">X position (mm)</label><input id="logoX" type="number" step="1" value="5" /></div>
-            <div><label for="logoY">Y position (mm)</label><input id="logoY" type="number" step="1" value="6" /></div>
+            <div><label for="logoX">X position (mm)</label><input id="logoX" type="number" step="1" value="7" /></div>
+            <div><label for="logoY">Y position (mm)</label><input id="logoY" type="number" step="1" value="8" /></div>
             <div><label for="logoW">Width (mm)</label><input id="logoW" type="number" step="1" min="1" value="78" /></div>
             <div><label for="logoH">Height (mm)</label><input id="logoH" type="number" step="1" min="1" value="26" /></div>
           </div>
 
           <h3>Desk / Seat Number</h3>
           <div class="control-grid">
-            <div><label for="seatX">X position (mm)</label><input id="seatX" type="number" step="1" value="107" /></div>
-            <div><label for="seatY">Y position (mm)</label><input id="seatY" type="number" step="1" value="5" /></div>
-            <div><label for="seatSize">Font size (pt)</label><input id="seatSize" type="number" step="1" min="1" value="81" /></div>
+            <div><label for="seatX">X position (mm)</label><input id="seatX" type="number" step="0.5" value="46.5" /></div>
+            <div><label for="seatY">Y position (mm)</label><input id="seatY" type="number" step="1" value="55" /></div>
+            <div><label for="seatSize">Font size (pt)</label><input id="seatSize" type="number" step="1" min="1" value="44" /></div>
           </div>
 
           <h3>Cachet</h3>
           <div class="control-grid">
-            <div><label for="cachetX">X position (mm)</label><input id="cachetX" type="number" step="1" value="36" /></div>
-            <div><label for="cachetY">Y position (mm)</label><input id="cachetY" type="number" step="1" value="265" /></div>
+            <div><label for="cachetX">X position (mm)</label><input id="cachetX" type="number" step="1" value="22" /></div>
+            <div><label for="cachetY">Y position (mm)</label><input id="cachetY" type="number" step="1" value="94" /></div>
             <div><label for="cachetW">Width (mm)</label><input id="cachetW" type="number" step="1" min="1" value="49" /></div>
             <div><label for="cachetH">Height (mm)</label><input id="cachetH" type="number" step="1" min="1" value="36" /></div>
           </div>
@@ -177,9 +193,9 @@
         const state = {
           printMode: "all",
           layout: {
-            logo: { x: 5, y: 6, w: 78, h: 26 },
-            seat: { x: 107, y: 5, size: 81 },
-            cachet: { x: 162, y: 265, w: 49, h: 36 }
+            logo: { x: 7, y: 8, w: 78, h: 26 },
+            seat: { x: 46.5, y: 55, size: 44 },
+            cachet: { x: 22, y: 94, w: 49, h: 36 }
           },
           seats: ["0001"]
         };
@@ -220,9 +236,13 @@
           }[char]));
         }
 
-        // Returns the page numbers that should be visible and printed.
-        function printableSeats() {
-          return state.seats.filter((seat, index) => {
+        // Groups seats into A4 pages before applying the page-based print filter.
+        function printablePages() {
+          const pages = [];
+          for (let index = 0; index < state.seats.length; index += 4) {
+            pages.push(state.seats.slice(index, index + 4));
+          }
+          return pages.filter((seats, index) => {
             const pageNumber = index + 1;
             if (state.printMode === "odd") return pageNumber % 2 === 1;
             if (state.printMode === "even") return pageNumber % 2 === 0;
@@ -230,17 +250,25 @@
           });
         }
 
-        // Builds a single A4 page so preview and print output share the exact markup.
-        function pageTemplate(seat, pageNumber) {
+        // Builds one reusable sticker. Its coordinates are always relative to its grid cell.
+        function renderSticker(seat) {
           const { logo, cachet } = state.layout;
           const seatLayout = state.layout.seat;
           return `
+            <article class="sticker" aria-label="Desk / Seat ${formatSeat(seat)}">
+              <img class="print-image" src="${imagePaths.logo}" alt="ENSABM logo" loading="eager" decoding="sync" style="left:${logo.x}mm;top:${logo.y}mm;width:${logo.w}mm;height:${logo.h}mm;" />
+              <div class="seat-number" style="left:${seatLayout.x}mm;top:${seatLayout.y}mm;font-size:${seatLayout.size}pt;transform:translateX(-50%);">${formatSeat(seat)}</div>
+              <img class="print-image" src="${imagePaths.cachet}" alt="Official cachet" loading="eager" decoding="sync" style="left:${cachet.x}mm;top:${cachet.y}mm;width:${cachet.w}mm;height:${cachet.h}mm;" />
+            </article>
+          `;
+        }
+
+        // Builds one A4 page from up to four sequential stickers.
+        function createPage(seats) {
+          return `
             <div class="page-wrap">
-              
               <section class="a4-page screen-page">
-                <img class="print-image" src="${imagePaths.logo}" alt="ENSABM logo" loading="eager" decoding="sync" style="left:${logo.x}mm;top:${logo.y}mm;width:${logo.w}mm;height:${logo.h}mm;" />
-                <img class="print-image" src="${imagePaths.cachet}" alt="Official cachet" loading="eager" decoding="sync" style="left:${cachet.x}mm;top:${cachet.y}mm;width:${cachet.w}mm;height:${cachet.h}mm;" />
-                <div class="seat-number" style="left:${seatLayout.x}mm;top:${seatLayout.y}mm;font-size:${seatLayout.size}pt;">${formatSeat(seat)}</div>
+                <div class="sticker-grid">${seats.map(renderSticker).join("")}</div>
               </section>
             </div>
           `;
@@ -248,9 +276,9 @@
 
         // Re-renders all live A4 preview pages after any control or table change.
         function renderPreview() {
-          const seats = printableSeats();
-          printPages.innerHTML = seats.length
-            ? seats.map((seat, index) => pageTemplate(seat, index + 1)).join("")
+          const pages = printablePages();
+          printPages.innerHTML = pages.length
+            ? pages.map(createPage).join("")
             : '<p class="hint no-print">No Desk / Seat rows available for this print mode.</p>';
           printModeText.textContent = `Current print mode: ${state.printMode === "all" ? "All pages" : state.printMode === "odd" ? "Odd pages" : "Even pages"}`;
         }
@@ -277,9 +305,9 @@
         // Writes default layout values back to controls and preview.
         function resetLayout() {
           Object.assign(state.layout, {
-            logo: { x: 5, y: 6, w: 78, h: 26 },
-            seat: { x: 107, y: 5, size: 81 },
-            cachet: { x: 162, y: 265, w: 49, h: 36 }
+            logo: { x: 7, y: 8, w: 78, h: 26 },
+            seat: { x: 46.5, y: 55, size: 44 },
+            cachet: { x: 22, y: 94, w: 49, h: 36 }
           });
           controls.logoX.value = state.layout.logo.x; controls.logoY.value = state.layout.logo.y;
           controls.logoW.value = state.layout.logo.w; controls.logoH.value = state.layout.logo.h;
