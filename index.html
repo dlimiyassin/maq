@@ -66,7 +66,6 @@
         min-width: 0;
         min-height: 0;
         overflow: hidden;
-        border: 0.25mm solid #999;
       }
       .screen-page {
         transform: scale(0.45);
@@ -78,7 +77,6 @@
         width: calc(210mm * 0.45);
         min-height: calc(297mm * 0.45);
         margin: 0 auto 16px;
-        border: 3px solid #ccc; /* Adds border around the preview container */
       }
       .sticker .print-image, .sticker .seat-number {
         position: absolute;
@@ -117,7 +115,6 @@
         }
         .a4-page:last-child { break-after: auto; page-break-after: auto; }
         .screen-page { transform: none; margin: 0; }
-        .sticker { border-color: #000; }
       }
     </style>
   </head>
@@ -125,7 +122,7 @@
     <main class="app">
       <header class="no-print">
         <h1>ENSABM Exam Paper Editor</h1>
-        <p class="hint">Position the logo, cachet, and Desk / Seat number inside one sticker, then print the generated A4 pages (four stickers per page).</p>
+        <p class="hint">Position the cachet and Desk / Seat number inside one sticker, then print the generated A4 pages (four stickers per page).</p>
       </header>
 
       <section class="top-layout">
@@ -143,14 +140,6 @@
         <section class="panel controls-panel no-print">
           <h2>Draft Layout</h2>
           <p class="hint">All measurements are relative to one sticker. The same layout is repeated in each A4 grid cell.</p>
-
-          <h3>ENSABM Logo</h3>
-          <div class="control-grid">
-            <div><label for="logoX">X position (mm)</label><input id="logoX" type="number" step="1" value="7" /></div>
-            <div><label for="logoY">Y position (mm)</label><input id="logoY" type="number" step="1" value="8" /></div>
-            <div><label for="logoW">Width (mm)</label><input id="logoW" type="number" step="1" min="1" value="78" /></div>
-            <div><label for="logoH">Height (mm)</label><input id="logoH" type="number" step="1" min="1" value="26" /></div>
-          </div>
 
           <h3>Desk / Seat Number</h3>
           <div class="control-grid">
@@ -193,23 +182,15 @@
         const state = {
           printMode: "all",
           layout: {
-            logo: { x: 7, y: 8, w: 78, h: 26 },
             seat: { x: 46.5, y: 55, size: 44 },
             cachet: { x: 22, y: 94, w: 49, h: 36 }
           },
-          seats: ["0001"]
+          seats: ["001", "002", "003", "004"]
         };
 
-        const imagePaths = {
-          logo: "images/logo.png",
-          cachet: "images/cache.png"
-        };
+        const imagePaths = { cachet: "images/cache.png" };
 
         const controls = {
-          logoX: document.getElementById("logoX"),
-          logoY: document.getElementById("logoY"),
-          logoW: document.getElementById("logoW"),
-          logoH: document.getElementById("logoH"),
           cachetX: document.getElementById("cachetX"),
           cachetY: document.getElementById("cachetY"),
           cachetW: document.getElementById("cachetW"),
@@ -223,10 +204,10 @@
         const seatRows = document.getElementById("seatRows");
         const printModeText = document.getElementById("printModeText");
 
-        // Converts a seat value to the required printable #01# format.
+        // Converts a seat value to a three-digit printable number.
         function formatSeat(value) {
           const clean = String(value || "").replace(/\D/g, "");
-          return `#${(clean || "0").padStart(2, "0")}#`;
+          return (clean || "0").slice(-3).padStart(3, "0");
         }
 
         // Keeps editable values safe when injecting table HTML.
@@ -252,11 +233,10 @@
 
         // Builds one reusable sticker. Its coordinates are always relative to its grid cell.
         function renderSticker(seat) {
-          const { logo, cachet } = state.layout;
+          const { cachet } = state.layout;
           const seatLayout = state.layout.seat;
           return `
             <article class="sticker" aria-label="Desk / Seat ${formatSeat(seat)}">
-              <img class="print-image" src="${imagePaths.logo}" alt="ENSABM logo" loading="eager" decoding="sync" style="left:${logo.x}mm;top:${logo.y}mm;width:${logo.w}mm;height:${logo.h}mm;" />
               <div class="seat-number" style="left:${seatLayout.x}mm;top:${seatLayout.y}mm;font-size:${seatLayout.size}pt;transform:translateX(-50%);">${formatSeat(seat)}</div>
               <img class="print-image" src="${imagePaths.cachet}" alt="Official cachet" loading="eager" decoding="sync" style="left:${cachet.x}mm;top:${cachet.y}mm;width:${cachet.w}mm;height:${cachet.h}mm;" />
             </article>
@@ -287,7 +267,7 @@
         function renderTable() {
           seatRows.innerHTML = state.seats.map((seat, index) => `
             <tr>
-              <td><input type="number" min="1" step="1" value="${escapeHtml(seat)}" data-index="${index}" aria-label="Desk / Seat ${index + 1}" /></td>
+              <td><input type="number" min="1" max="999" step="1" value="${escapeHtml(formatSeat(seat))}" data-index="${index}" aria-label="Desk / Seat ${index + 1}" /></td>
               <td><button type="button" data-delete="${index}">Delete row</button></td>
             </tr>
           `).join("");
@@ -296,7 +276,6 @@
 
         // Reads numeric control values into layout state.
         function readLayoutControls() {
-          state.layout.logo = { x: +controls.logoX.value, y: +controls.logoY.value, w: +controls.logoW.value, h: +controls.logoH.value };
           state.layout.cachet = { x: +controls.cachetX.value, y: +controls.cachetY.value, w: +controls.cachetW.value, h: +controls.cachetH.value };
           state.layout.seat = { x: +controls.seatX.value, y: +controls.seatY.value, size: +controls.seatSize.value };
           renderPreview();
@@ -305,12 +284,9 @@
         // Writes default layout values back to controls and preview.
         function resetLayout() {
           Object.assign(state.layout, {
-            logo: { x: 7, y: 8, w: 78, h: 26 },
             seat: { x: 46.5, y: 55, size: 44 },
             cachet: { x: 22, y: 94, w: 49, h: 36 }
           });
-          controls.logoX.value = state.layout.logo.x; controls.logoY.value = state.layout.logo.y;
-          controls.logoW.value = state.layout.logo.w; controls.logoH.value = state.layout.logo.h;
           controls.cachetX.value = state.layout.cachet.x; controls.cachetY.value = state.layout.cachet.y;
           controls.cachetW.value = state.layout.cachet.w; controls.cachetH.value = state.layout.cachet.h;
           controls.seatX.value = state.layout.seat.x; controls.seatY.value = state.layout.seat.y; controls.seatSize.value = state.layout.seat.size;
@@ -347,12 +323,12 @@
           document.getElementById("printOddBtn").addEventListener("click", () => printWithMode("odd"));
           document.getElementById("printEvenBtn").addEventListener("click", () => printWithMode("even"));
           document.getElementById("addRowBtn").addEventListener("click", () => {
-            state.seats.push(String(state.seats.length + 1).padStart(2, "0"));
+            state.seats.push(String(state.seats.length + 1).padStart(3, "0"));
             renderTable();
           });
           document.getElementById("generateBtn").addEventListener("click", () => {
             const count = Math.max(state.seats.length, 20);
-            state.seats = Array.from({ length: count }, (_, index) => String(index + 1).padStart(2, "0"));
+            state.seats = Array.from({ length: count }, (_, index) => String(index + 1).padStart(3, "0"));
             renderTable();
           });
           document.getElementById("clearBtn").addEventListener("click", () => {
@@ -361,7 +337,7 @@
           });
           seatRows.addEventListener("input", (event) => {
             if (!event.target.matches("input[data-index]")) return;
-            state.seats[Number(event.target.dataset.index)] = event.target.value;
+            state.seats[Number(event.target.dataset.index)] = formatSeat(event.target.value);
             renderPreview();
           });
           seatRows.addEventListener("click", (event) => {
