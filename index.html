@@ -44,6 +44,10 @@
       label { display: block; font-weight: 700; margin-bottom: 4px; }
       input[type="number"] { width: 100%; padding: 6px; }
       button { padding: 7px 10px; margin: 0 4px 8px 0; cursor: pointer; }
+      .sticker-insert-controls { display: inline-flex; align-items: center; gap: 4px; }
+      .sticker-insert-controls label { margin: 0; white-space: nowrap; }
+      .sticker-insert-controls input { width: 90px; margin-bottom: 8px; }
+      .sticker-insert-controls button { margin-right: 0; }
       .a4-page {
         position: relative;
         width: 297mm;
@@ -165,6 +169,11 @@
         <div>
           <button id="addRowBtn" type="button">Add row</button>
           <button id="generateBtn" type="button">Generate sequential numbers automatically</button>
+          <span class="sticker-insert-controls">
+            <label for="stickerCount">Stickers:</label>
+            <input id="stickerCount" type="number" min="1" max="999" step="1" value="1" />
+            <button id="insertStickersBtn" type="button">Insert stickers</button>
+          </span>
           <button id="clearBtn" type="button">Clear rows</button>
         </div>
         <table>
@@ -203,6 +212,7 @@
         const printPages = document.getElementById("printPages");
         const seatRows = document.getElementById("seatRows");
         const printModeText = document.getElementById("printModeText");
+        const stickerCount = document.getElementById("stickerCount");
 
         // Converts a seat value to a three-digit printable number.
         function formatSeat(value) {
@@ -315,6 +325,24 @@
           window.print();
         }
 
+        // Adds the requested number of new stickers using the next available seat number.
+        function insertStickers() {
+          const count = Math.floor(Number(stickerCount.value));
+          if (!Number.isFinite(count) || count < 1) {
+            stickerCount.focus();
+            return;
+          }
+          const highestSeat = state.seats.reduce((highest, seat) => Math.max(highest, Number(formatSeat(seat))), 0);
+          if (highestSeat + count > 999) {
+            stickerCount.setCustomValidity(`Only ${999 - highestSeat} more numbered stickers can be inserted.`);
+            stickerCount.reportValidity();
+            return;
+          }
+          stickerCount.setCustomValidity("");
+          state.seats.push(...Array.from({ length: count }, (_, index) => formatSeat(highestSeat + index + 1)));
+          renderTable();
+        }
+
         // Binds all user interactions once at startup.
         function bindEvents() {
           Object.values(controls).forEach((input) => input.addEventListener("input", readLayoutControls));
@@ -330,6 +358,11 @@
             const count = Math.max(state.seats.length, 20);
             state.seats = Array.from({ length: count }, (_, index) => String(index + 1).padStart(3, "0"));
             renderTable();
+          });
+          document.getElementById("insertStickersBtn").addEventListener("click", insertStickers);
+          stickerCount.addEventListener("input", () => stickerCount.setCustomValidity(""));
+          stickerCount.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") insertStickers();
           });
           document.getElementById("clearBtn").addEventListener("click", () => {
             state.seats = [];
