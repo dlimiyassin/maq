@@ -58,7 +58,7 @@
       }
       .sticker-grid {
         display: grid;
-        grid-template-columns: minmax(0, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         grid-template-rows: repeat(4, minmax(0, 1fr));
         gap: 4mm;
         width: 281mm;
@@ -126,7 +126,7 @@
     <main class="app">
       <header class="no-print">
         <h1>ENSABM Exam Paper Editor</h1>
-        <p class="hint">Position the cachet on the left and the Desk / Seat number on the right inside each horizontal sticker, then print the generated landscape A4 pages (four stickers per page).</p>
+        <p class="hint">Position the cachet on the left and the Desk / Seat number on the right inside each horizontal sticker, then print the generated landscape A4 pages (eight stickers per page).</p>
       </header>
 
       <section class="top-layout">
@@ -143,11 +143,11 @@
 
         <section class="panel controls-panel no-print">
           <h2>Draft Layout</h2>
-          <p class="hint">All measurements are relative to one horizontal sticker. The same layout is repeated down each landscape A4 page.</p>
+          <p class="hint">All measurements are relative to one horizontal sticker. The same layout is repeated across and down each landscape A4 page.</p>
 
           <h3>Desk / Seat Number</h3>
           <div class="control-grid">
-            <div><label for="seatX">X position (mm)</label><input id="seatX" type="number" step="0.5" value="178" /></div>
+            <div><label for="seatX">X position (mm)</label><input id="seatX" type="number" step="0.5" value="105" /></div>
             <div><label for="seatY">Y position (mm)</label><input id="seatY" type="number" step="0.5" value="22.75" /></div>
             <div><label for="seatSize">Font size (pt)</label><input id="seatSize" type="number" step="1" min="1" value="44" /></div>
           </div>
@@ -191,10 +191,10 @@
         const state = {
           printMode: "all",
           layout: {
-            seat: { x: 178, y: 22.75, size: 44 },
+            seat: { x: 105, y: 22.75, size: 44 },
             cachet: { x: 20, y: 4.75, w: 49, h: 36 }
           },
-          seats: ["001", "002", "003", "004"]
+          seats: ["001", "002", "003", "004", "005", "006", "007", "008"]
         };
 
         const imagePaths = { cachet: "images/cache.png" };
@@ -230,8 +230,8 @@
         // Groups seats into A4 pages before applying the page-based print filter.
         function printablePages() {
           const pages = [];
-          for (let index = 0; index < state.seats.length; index += 4) {
-            pages.push(state.seats.slice(index, index + 4));
+          for (let index = 0; index < state.seats.length; index += 8) {
+            pages.push(state.seats.slice(index, index + 8));
           }
           return pages.filter((seats, index) => {
             const pageNumber = index + 1;
@@ -253,7 +253,7 @@
           `;
         }
 
-        // Builds one landscape A4 page from up to four vertically stacked stickers.
+        // Builds one landscape A4 page from up to eight stickers in two columns and four rows.
         function createPage(seats) {
           return `
             <div class="page-wrap">
@@ -294,7 +294,7 @@
         // Writes default layout values back to controls and preview.
         function resetLayout() {
           Object.assign(state.layout, {
-            seat: { x: 178, y: 22.75, size: 44 },
+            seat: { x: 105, y: 22.75, size: 44 },
             cachet: { x: 20, y: 4.75, w: 49, h: 36 }
           });
           controls.cachetX.value = state.layout.cachet.x; controls.cachetY.value = state.layout.cachet.y;
